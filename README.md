@@ -8,6 +8,9 @@ Skyfora is a weather forecasting app that provides detailed and accurate weather
 - **City Search**: Search for cities with autocomplete functionality.
 - **Offline Mode**: Cached weather data is displayed when offline.
 
+## Download it here
+https://drive.google.com/file/d/1N-4VUqby5luOA1HwcZTv__lBMY8dj6IC/view?usp=drive_link
+
 ![Screenshot 2025-01-27 at 4 47 32 PM](https://github.com/user-attachments/assets/751a45a4-dd42-4d93-98bd-be8dd0da7dea)
 ![Screenshot 2025-01-27 at 4 50 31 PM](https://github.com/user-attachments/assets/9a2e2deb-7e2a-4d9a-9f57-87003e9f4558)
 ![Screenshot 2025-01-27 at 4 52 50 PM](https://github.com/user-attachments/assets/c55a2fdb-cdc9-4d16-8dc6-69561c2b8d07)
