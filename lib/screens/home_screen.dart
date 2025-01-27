@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_location_search/flutter_location_search.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:skyfora_weather/cubit/weather_cubit.dart';
 import 'package:skyfora_weather/cubit/weather_state.dart';
@@ -14,12 +15,33 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.lightBlueAccent,
       appBar: AppBar(
-        title: const Text('Lower Kabete'),
+        title: BlocSelector<WeatherCubit, WeatherState, String?>(
+          selector: (state) => state is WeatherLoaded ? state.weatherResponse.city.name : '',
+          builder: (context, cityName) {
+            return Text(cityName ?? "Unknown City");
+          },
+        ),
+
         leading: const Icon(Icons.location_on_outlined),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Icon(Icons.search),
+        actions:  [
+          InkWell(
+            onTap: () async {
+              LocationData? locationData = await LocationSearch.show(
+                context: context,
+                lightAddress: true,
+                mode: Mode.overlay,
+              );
+
+              if(locationData != null && context.mounted) {
+                context
+                  .read<WeatherCubit>()
+                  .fetchWeather(locationData.latitude, locationData.longitude);
+              }
+            },
+            child: const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Icon(Icons.search),
+            ),
           )
         ],
         centerTitle: false,
