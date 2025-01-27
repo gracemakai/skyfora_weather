@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_location_search/flutter_location_search.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:skyfora_weather/cubit/weather_cubit.dart';
 import 'package:skyfora_weather/cubit/weather_state.dart';
 import 'package:skyfora_weather/models/weather_model.dart';
@@ -57,13 +58,26 @@ class HomeScreen extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         } else if (state is WeatherLoaded) {
           final WeatherResponse weather = state.weatherResponse;
-
           return Padding(
             padding: const EdgeInsets.all(15.0),
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+               FutureBuilder<DateTime?>(
+              future: context.read<WeatherCubit>().getLastUpdated(),
+              builder: (context, snapshot) {
+                final lastUpdated = snapshot.data;
+                return lastUpdated != null ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('No internet connection', style: TextStyle(fontSize: 14.sp),),
+                      Text('Last updated: ${DateFormat('dd MMM, HH:mm').format(lastUpdated)}',
+                          style: const TextStyle(color: Colors.black45)),
+                  ],
+                ): Container();
+              },
+            ),
                   SizedBox(
                     height: 0.25.sh,
                     width: 1.sw,
@@ -182,7 +196,7 @@ class HomeScreen extends StatelessWidget {
                         }),
                   ),
                   SizedBox(
-                    height: 0.01.sh,
+                    height: 0.02.sh,
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,6 +209,7 @@ class HomeScreen extends StatelessWidget {
                         height: 0.5.sh,
                         child: ListView.builder(
                             itemCount: 5,
+                            physics: const NeverScrollableScrollPhysics(),
                             scrollDirection: Axis.vertical,
                             itemBuilder: (BuildContext context, int index) {
                               Map<String, dynamic> forecast = state
@@ -206,10 +221,10 @@ class HomeScreen extends StatelessWidget {
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     SizedBox(
-                                      width: 0.22.sw,
+                                      width: 0.25.sw,
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -262,13 +277,8 @@ class HomeScreen extends StatelessWidget {
             ),
           );
         }
-        return Center(
-          child: ElevatedButton(
-            onPressed: () {
-              context.read<WeatherCubit>().fetchWeather(-1.2426283, 36.7613712);
-            },
-            child: const Text('Load Weather'),
-          ),
+        return const Center(
+          child: Text('There was a problem loading the weather. Please try again later'),
         );
       }),
     );
@@ -288,7 +298,10 @@ class WeatherIcon extends StatelessWidget {
     return Image.network(
       'https://openweathermap.org/img/wn/$icon@2x.png',
       errorBuilder: (context, error, stackTrace) {
-        return const Text('Icon not available');
+        return SizedBox(
+          height: 0.03.sh,
+          width: 0.sw,
+        );
       },
     );
   }

@@ -25,6 +25,17 @@ class WeatherResponse {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'cod': cod,
+      'message': message,
+      'cnt': cnt,
+      'list': list.map((item) => item.toJson()).toList(),
+      'city': city.toJson(),
+    };
+  }
+
+
   List<Map<String, dynamic>> getFiveDayForecast() {
     Map<String, Map<String, dynamic>> dailyForecast = {};
 
@@ -50,22 +61,14 @@ class WeatherForecast {
   final int dt;
   final Main main;
   final List<Weather> weather;
-  final Clouds clouds;
   final Wind wind;
-  final int visibility;
-  final double pop;
-  final Sys sys;
   final String dtTxt;
 
   WeatherForecast({
     required this.dt,
     required this.main,
     required this.weather,
-    required this.clouds,
     required this.wind,
-    required this.visibility,
-    required this.pop,
-    required this.sys,
     required this.dtTxt,
   });
 
@@ -76,74 +79,74 @@ class WeatherForecast {
       weather: (json['weather'] as List)
           .map((item) => Weather.fromJson(item))
           .toList(),
-      clouds: Clouds.fromJson(json['clouds']),
       wind: Wind.fromJson(json['wind']),
-      visibility: json['visibility'],
-      pop: (json['pop'] as num).toDouble(),
-      sys: Sys.fromJson(json['sys']),
       dtTxt: json['dt_txt'],
     );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'dt': dt,
+      'main': main.toJson(),
+      'weather': weather.map((item) => item.toJson()).toList(),
+      'dt_txt': dtTxt,
+      'wind': wind.toJson(),
+    };
   }
 }
 
 class Main {
   final double temp;
-  final double feelsLike;
-  final double tempMin;
-  final double tempMax;
-  final int pressure;
-  final int seaLevel;
-  final int grndLevel;
-  final int humidity;
-  final double tempKf;
+  final int? pressure;
+  final int? seaLevel;
+  final int? grndLevel;
+  final int? humidity;
 
   Main({
     required this.temp,
-    required this.feelsLike,
-    required this.tempMin,
-    required this.tempMax,
     required this.pressure,
     required this.seaLevel,
     required this.grndLevel,
     required this.humidity,
-    required this.tempKf,
   });
 
   factory Main.fromJson(Map<String, dynamic> json) {
     return Main(
       temp: (json['temp'] as num).toDouble(),
-      feelsLike: (json['feels_like'] as num).toDouble(),
-      tempMin: (json['temp_min'] as num).toDouble(),
-      tempMax: (json['temp_max'] as num).toDouble(),
       pressure: json['pressure'],
       seaLevel: json['sea_level'],
       grndLevel: json['grnd_level'],
       humidity: json['humidity'],
-      tempKf: (json['temp_kf'] as num).toDouble(),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'temp': temp,
+    };
   }
 }
 
 class Weather {
-  final int id;
-  final String main;
   final String description;
   final String icon;
 
   Weather({
-    required this.id,
-    required this.main,
     required this.description,
     required this.icon,
   });
 
   factory Weather.fromJson(Map<String, dynamic> json) {
     return Weather(
-      id: json['id'],
-      main: json['main'],
       description: json['description'],
       icon: json['icon'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'description': description,
+      'icon': icon,
+    };
   }
 }
 
@@ -177,6 +180,14 @@ class Wind {
       gust: (json['gust'] as num).toDouble(),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'speed': speed,
+      'deg': deg,
+      'gust': gust,
+    };
+  }
 }
 
 class Sys {
@@ -196,8 +207,6 @@ class City {
   final String name;
   final Coord coord;
   final String country;
-  final int population;
-  final int timezone;
   final int sunrise;
   final int sunset;
 
@@ -206,8 +215,6 @@ class City {
     required this.name,
     required this.coord,
     required this.country,
-    required this.population,
-    required this.timezone,
     required this.sunrise,
     required this.sunset,
   });
@@ -218,11 +225,20 @@ class City {
       name: json['name'],
       coord: Coord.fromJson(json['coord']),
       country: json['country'],
-      population: json['population'],
-      timezone: json['timezone'],
       sunrise: json['sunrise'],
       sunset: json['sunset'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'coord': coord.toJson(),
+      'country': country,
+      'sunrise': sunrise,
+      'sunset': sunset,
+    };
   }
 }
 
@@ -237,5 +253,12 @@ class Coord {
       lat: (json['lat'] as num).toDouble(),
       lon: (json['lon'] as num).toDouble(),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'lat': lat,
+      'lon': lon,
+    };
   }
 }
