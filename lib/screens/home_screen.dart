@@ -15,15 +15,21 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.lightBlueAccent,
       appBar: AppBar(
-        title: BlocSelector<WeatherCubit, WeatherState, String?>(
-          selector: (state) => state is WeatherLoaded ? state.weatherResponse.city.name : '',
-          builder: (context, cityName) {
-            return Text(cityName ?? "Unknown City");
+        title: BlocBuilder<WeatherCubit, WeatherState>(
+          builder: (context, state) {
+            if (state is WeatherLoaded) {
+              String city = state.weatherResponse.city.name.isNotEmpty
+                  ? state.weatherResponse.city.name
+                  : 'Unknown location';
+              return Text(city);
+            } else if (state is WeatherLoading) {
+              return const CircularProgressIndicator();
+            }
+            return const Text('Unknown location');
           },
         ),
-
         leading: const Icon(Icons.location_on_outlined),
-        actions:  [
+        actions: [
           InkWell(
             onTap: () async {
               LocationData? locationData = await LocationSearch.show(
@@ -32,10 +38,9 @@ class HomeScreen extends StatelessWidget {
                 mode: Mode.overlay,
               );
 
-              if(locationData != null && context.mounted) {
-                context
-                  .read<WeatherCubit>()
-                  .fetchWeather(locationData.latitude, locationData.longitude);
+              if (locationData != null && context.mounted) {
+                context.read<WeatherCubit>().fetchWeather(
+                    locationData.latitude, locationData.longitude);
               }
             },
             child: const Padding(
@@ -67,7 +72,8 @@ class HomeScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                    fahrenheitToCelsiusConverter(weather.list.first.main.temp),
+                          fahrenheitToCelsiusConverter(
+                              weather.list.first.main.temp),
                           style: TextStyle(
                               fontSize: 50.sp,
                               color: Colors.white70,
@@ -128,7 +134,7 @@ class HomeScreen extends StatelessWidget {
                                   SizedBox(
                                     width: 0.01.sw,
                                   ),
-                                   Text(
+                                  Text(
                                     '${weather.list.first.main.pressure}',
                                     style: const TextStyle(
                                       color: Colors.white70,
@@ -151,7 +157,8 @@ class HomeScreen extends StatelessWidget {
                         itemCount: 6,
                         scrollDirection: Axis.horizontal,
                         itemBuilder: (BuildContext context, int index) {
-                          WeatherForecast weatherForecast = weather.list.elementAt(index);
+                          WeatherForecast weatherForecast =
+                              weather.list.elementAt(index);
                           return SizedBox(
                             width: 0.17.sw,
                             child: Column(
@@ -159,12 +166,13 @@ class HomeScreen extends StatelessWidget {
                                 Text(
                                   formatDateToTime(weatherForecast.dt),
                                   style: TextStyle(
-                                      color: Colors.black26,
-                                      fontSize: 14.sp),
+                                      color: Colors.black26, fontSize: 14.sp),
                                 ),
-                                WeatherIcon(icon: weatherForecast.weather.first.icon),
+                                WeatherIcon(
+                                    icon: weatherForecast.weather.first.icon),
                                 Text(
-                                  fahrenheitToCelsiusConverter(weatherForecast.main.temp),
+                                  fahrenheitToCelsiusConverter(
+                                      weatherForecast.main.temp),
                                   style: TextStyle(
                                       color: Colors.black, fontSize: 14.sp),
                                 ),
@@ -189,7 +197,10 @@ class HomeScreen extends StatelessWidget {
                             itemCount: 5,
                             scrollDirection: Axis.vertical,
                             itemBuilder: (BuildContext context, int index) {
-                              Map<String, dynamic> forecast = state.weatherResponse.getFiveDayForecast().elementAt(index);
+                              Map<String, dynamic> forecast = state
+                                  .weatherResponse
+                                  .getFiveDayForecast()
+                                  .elementAt(index);
                               return Padding(
                                 padding: const EdgeInsets.all(10.0),
                                 child: Row(
@@ -200,7 +211,8 @@ class HomeScreen extends StatelessWidget {
                                     SizedBox(
                                       width: 0.22.sw,
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             getDayOfWeek(forecast['date']),
@@ -209,7 +221,8 @@ class HomeScreen extends StatelessWidget {
                                                 fontSize: 14.sp),
                                           ),
                                           Text(
-                                            formatToDayAndMonth(forecast['date']),
+                                            formatToDayAndMonth(
+                                                forecast['date']),
                                             style: TextStyle(
                                                 color: Colors.black26,
                                                 fontSize: 14.sp),
@@ -218,7 +231,8 @@ class HomeScreen extends StatelessWidget {
                                       ),
                                     ),
                                     Text(
-                                    fahrenheitToCelsiusConverter( forecast['temp']),
+                                      fahrenheitToCelsiusConverter(
+                                          forecast['temp']),
                                       style: TextStyle(
                                           color: Colors.black, fontSize: 14.sp),
                                       textAlign: TextAlign.start,
@@ -228,12 +242,14 @@ class HomeScreen extends StatelessWidget {
                                       child: Text(
                                         forecast['description'],
                                         style: TextStyle(
-                                            color: Colors.black, fontSize: 14.sp),
+                                            color: Colors.black,
+                                            fontSize: 14.sp),
                                       ),
                                     ),
                                     SizedBox(
-                                      height: 0.05.sh,
-                                        child: WeatherIcon(icon: forecast['icon'])),
+                                        height: 0.05.sh,
+                                        child: WeatherIcon(
+                                            icon: forecast['icon'])),
                                   ],
                                 ),
                               );
@@ -249,9 +265,7 @@ class HomeScreen extends StatelessWidget {
         return Center(
           child: ElevatedButton(
             onPressed: () {
-              context
-                  .read<WeatherCubit>()
-                  .fetchWeather(-1.2426283, 36.7613712);
+              context.read<WeatherCubit>().fetchWeather(-1.2426283, 36.7613712);
             },
             child: const Text('Load Weather'),
           ),
