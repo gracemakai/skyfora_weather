@@ -7,6 +7,8 @@ import 'package:skyfora_weather/cubit/weather_cubit.dart';
 import 'package:skyfora_weather/cubit/weather_state.dart';
 import 'package:skyfora_weather/models/weather_model.dart';
 import 'package:skyfora_weather/util/converters.dart';
+import 'package:skyfora_weather/widgets/page_background.dart';
+import 'package:skyfora_weather/widgets/weather_icon.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -60,7 +62,7 @@ class HomeScreen extends StatelessWidget {
           final WeatherResponse weather = state.weatherResponse;
           return Stack(
             children: [
-              _getBackgroundByWeather(weather.list.first.weather.first.main),
+              getBackgroundByWeather(weather.list.first.weather.first.main),
               Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: SingleChildScrollView(
@@ -307,58 +309,4 @@ class HomeScreen extends StatelessWidget {
       }),
     );
   }
-}
-
-class WeatherIcon extends StatelessWidget {
-  const WeatherIcon({
-    super.key,
-    required this.icon,
-  });
-
-  final String icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Image.network(
-      'https://openweathermap.org/img/wn/$icon@2x.png',
-      errorBuilder: (context, error, stackTrace) {
-        return SizedBox(
-          height: 0.03.sh,
-          width: 0.sw,
-        );
-      },
-    );
-  }
-}
-
-// Helper method to return a widget based on weather condition
-Widget _getBackgroundByWeather(String condition) {
-  switch (condition.toLowerCase()) {
-    case 'clear':
-      return _buildBackground(Colors.blue, "assets/images/clear.jpg");
-    case 'clouds':
-      return _buildBackground(Colors.grey, "assets/images/cloudy.jpg");
-    case 'rain':
-      return _buildBackground(Colors.blueGrey, "assets/images/rainy.jpg");
-    case 'storm':
-      return _buildBackground(Colors.black, "assets/images/rainy.jpg");
-    case 'snow':
-      return _buildBackground(Colors.white, "assets/images/snow.jpg");
-    default:
-      return _buildBackground(
-          Colors.lightBlue, "assets/images/default_weather.jpg");
-  }
-}
-
-// Helper method to return a container with a background color or image
-Widget _buildBackground(Color color, String image) {
-  return Container(
-    decoration: BoxDecoration(
-      color: color,
-      image: DecorationImage(
-        image: AssetImage(image), // Optional: Add an image as background
-        fit: BoxFit.cover,
-      ),
-    ),
-  );
 }
