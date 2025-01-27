@@ -14,7 +14,6 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.lightBlueAccent,
       appBar: AppBar(
         title: BlocBuilder<WeatherCubit, WeatherState>(
           builder: (context, state) {
@@ -24,7 +23,7 @@ class HomeScreen extends StatelessWidget {
                   : 'Unknown location';
               return Text(city);
             } else if (state is WeatherLoading) {
-              return const CircularProgressIndicator();
+              return Container();
             }
             return const Text('Unknown location');
           },
@@ -46,239 +45,264 @@ class HomeScreen extends StatelessWidget {
             },
             child: const Padding(
               padding: EdgeInsets.all(8.0),
-              child: Icon(Icons.search),
+              child: Icon(Icons.search, color: Colors.black,),
             ),
           )
         ],
         centerTitle: false,
         backgroundColor: Colors.transparent,
       ),
+      extendBodyBehindAppBar: true,
       body: BlocBuilder<WeatherCubit, WeatherState>(builder: (context, state) {
         if (state is WeatherLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is WeatherLoaded) {
           final WeatherResponse weather = state.weatherResponse;
-          return Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-               FutureBuilder<DateTime?>(
-              future: context.read<WeatherCubit>().getLastUpdated(),
-              builder: (context, snapshot) {
-                final lastUpdated = snapshot.data;
-                return lastUpdated != null ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('No internet connection', style: TextStyle(fontSize: 14.sp),),
-                      Text('Last updated: ${DateFormat('dd MMM, HH:mm').format(lastUpdated)}',
-                          style: const TextStyle(color: Colors.black45)),
-                  ],
-                ): Container();
-              },
-            ),
-                  SizedBox(
-                    height: 0.25.sh,
-                    width: 1.sw,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          fahrenheitToCelsiusConverter(
-                              weather.list.first.main.temp),
-                          style: TextStyle(
-                              fontSize: 50.sp,
-                              color: Colors.white70,
-                              fontWeight: FontWeight.w600),
-                        ),
-                        Text(
-                          weather.list.first.weather[0].description,
-                          style: TextStyle(
-                            fontSize: 20.sp,
-                            color: Colors.white70,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.air,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(
-                                    width: 0.01.sw,
-                                  ),
-                                  Text(
-                                    '${weather.list.first.wind.speed} km/h',
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.water_drop_outlined,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(
-                                    width: 0.01.sw,
-                                  ),
-                                  Text(
-                                    '${weather.list.first.main.humidity}%',
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.compress_rounded,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(
-                                    width: 0.01.sw,
-                                  ),
-                                  Text(
-                                    '${weather.list.first.main.pressure}',
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: 0.01.sh,
-                  ),
-                  SizedBox(
-                    height: 0.17.sh,
-                    child: ListView.builder(
-                        itemCount: 6,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (BuildContext context, int index) {
-                          WeatherForecast weatherForecast =
-                              weather.list.elementAt(index);
-                          return SizedBox(
-                            width: 0.17.sw,
-                            child: Column(
-                              children: [
-                                Text(
-                                  formatDateToTime(weatherForecast.dt),
-                                  style: TextStyle(
-                                      color: Colors.black26, fontSize: 14.sp),
-                                ),
-                                WeatherIcon(
-                                    icon: weatherForecast.weather.first.icon),
-                                Text(
-                                  fahrenheitToCelsiusConverter(
-                                      weatherForecast.main.temp),
-                                  style: TextStyle(
-                                      color: Colors.black, fontSize: 14.sp),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                  ),
-                  SizedBox(
-                    height: 0.02.sh,
-                  ),
-                  Column(
+          return Stack(
+            children: [
+              _getBackgroundByWeather(weather.list.first.weather.first.main),
+              Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: SingleChildScrollView(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '5 day forecast',
-                        style: TextStyle(color: Colors.black, fontSize: 14.sp),
-                      ),
                       SizedBox(
-                        height: 0.5.sh,
-                        child: ListView.builder(
-                            itemCount: 5,
-                            physics: const NeverScrollableScrollPhysics(),
-                            scrollDirection: Axis.vertical,
-                            itemBuilder: (BuildContext context, int index) {
-                              Map<String, dynamic> forecast = state
-                                  .weatherResponse
-                                  .getFiveDayForecast()
-                                  .elementAt(index);
-                              return Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                        height: 0.1.sh,
+                      ),
+                      FutureBuilder<DateTime?>(
+                        future: context.read<WeatherCubit>().getLastUpdated(),
+                        builder: (context, snapshot) {
+                          final lastUpdated = snapshot.data;
+                          return lastUpdated != null
+                              ? Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    SizedBox(
-                                      width: 0.25.sw,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            getDayOfWeek(forecast['date']),
-                                            style: TextStyle(
-                                                color: Colors.black54,
-                                                fontSize: 14.sp),
-                                          ),
-                                          Text(
-                                            formatToDayAndMonth(
-                                                forecast['date']),
-                                            style: TextStyle(
-                                                color: Colors.black26,
-                                                fontSize: 14.sp),
-                                          ),
-                                        ],
-                                      ),
+                                    Text(
+                                      'No internet connection',
+                                      style: TextStyle(fontSize: 14.sp),
                                     ),
                                     Text(
+                                        'Last updated: ${DateFormat('dd MMM, HH:mm').format(lastUpdated)}',
+                                        style: const TextStyle(
+                                            color: Colors.black45)),
+                                  ],
+                                )
+                              : Container();
+                        },
+                      ),
+                      SizedBox(
+                        height: 0.25.sh,
+                        width: 1.sw,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              fahrenheitToCelsiusConverter(
+                                  weather.list.first.main.temp),
+                              style: TextStyle(
+                                  fontSize: 50.sp,
+                                  color: Colors.black26,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                            Text(
+                              weather.list.first.weather[0].description,
+                              style: TextStyle(
+                                fontSize: 20.sp,
+                                color: Colors.black26,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.air,
+                                        color: Colors.black,
+                                      ),
+                                      SizedBox(
+                                        width: 0.01.sw,
+                                      ),
+                                      Text(
+                                        '${weather.list.first.wind.speed} km/h',
+                                        style: const TextStyle(
+                                          color: Colors.black45,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.water_drop_outlined,
+                                        color: Colors.black,
+                                      ),
+                                      SizedBox(
+                                        width: 0.01.sw,
+                                      ),
+                                      Text(
+                                        '${weather.list.first.main.humidity}%',
+                                        style: const TextStyle(
+                                          color: Colors.black45,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.compress_rounded,
+                                        color: Colors.black,
+                                      ),
+                                      SizedBox(
+                                        width: 0.01.sw,
+                                      ),
+                                      Text(
+                                        '${weather.list.first.main.pressure}',
+                                        style: const TextStyle(
+                                          color: Colors.black45,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 0.01.sh,
+                      ),
+                      SizedBox(
+                        height: 0.17.sh,
+                        child: ListView.builder(
+                            itemCount: 6,
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (BuildContext context, int index) {
+                              WeatherForecast weatherForecast =
+                                  weather.list.elementAt(index);
+                              return SizedBox(
+                                width: 0.17.sw,
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      formatDateToTime(weatherForecast.dt),
+                                      style: TextStyle(
+                                          color: Colors.black26,
+                                          fontSize: 14.sp),
+                                    ),
+                                    WeatherIcon(
+                                        icon:
+                                            weatherForecast.weather.first.icon),
+                                    Text(
                                       fahrenheitToCelsiusConverter(
-                                          forecast['temp']),
+                                          weatherForecast.main.temp),
                                       style: TextStyle(
                                           color: Colors.black, fontSize: 14.sp),
-                                      textAlign: TextAlign.start,
                                     ),
-                                    SizedBox(
-                                      width: 0.29.sw,
-                                      child: Text(
-                                        forecast['description'],
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 14.sp),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                        height: 0.05.sh,
-                                        child: WeatherIcon(
-                                            icon: forecast['icon'])),
                                   ],
                                 ),
                               );
                             }),
                       ),
+                      SizedBox(
+                        height: 0.02.sh,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '5 day forecast',
+                            style:
+                                TextStyle(color: Colors.black, fontSize: 14.sp),
+                          ),
+                          SizedBox(
+                            height: 0.5.sh,
+                            child: ListView.builder(
+                                itemCount: 5,
+                                padding: EdgeInsets.zero,
+                                physics: const NeverScrollableScrollPhysics(),
+                                scrollDirection: Axis.vertical,
+                                itemBuilder: (BuildContext context, int index) {
+                                  Map<String, dynamic> forecast = state
+                                      .weatherResponse
+                                      .getFiveDayForecast()
+                                      .elementAt(index);
+                                  return Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(
+                                          width: 0.25.sw,
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                getDayOfWeek(forecast['date']),
+                                                style: TextStyle(
+                                                    color: Colors.black54,
+                                                    fontSize: 14.sp),
+                                              ),
+                                              Text(
+                                                formatToDayAndMonth(
+                                                    forecast['date']),
+                                                style: TextStyle(
+                                                    color: Colors.black26,
+                                                    fontSize: 14.sp),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Text(
+                                          fahrenheitToCelsiusConverter(
+                                              forecast['temp']),
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 14.sp),
+                                          textAlign: TextAlign.start,
+                                        ),
+                                        SizedBox(
+                                          width: 0.29.sw,
+                                          child: Text(
+                                            forecast['description'],
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 14.sp),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                            height: 0.05.sh,
+                                            child: WeatherIcon(
+                                                icon: forecast['icon'])),
+                                      ],
+                                    ),
+                                  );
+                                }),
+                          ),
+                        ],
+                      )
                     ],
-                  )
-                ],
+                  ),
+                ),
               ),
-            ),
+            ],
           );
         }
         return const Center(
-          child: Text('There was a problem loading the weather. Please try again later'),
+          child: Text(
+              'There was a problem loading the weather. Please try again later'),
         );
       }),
     );
@@ -305,4 +329,36 @@ class WeatherIcon extends StatelessWidget {
       },
     );
   }
+}
+
+// Helper method to return a widget based on weather condition
+Widget _getBackgroundByWeather(String condition) {
+  switch (condition.toLowerCase()) {
+    case 'clear':
+      return _buildBackground(Colors.blue, "assets/images/clear.jpg");
+    case 'clouds':
+      return _buildBackground(Colors.grey, "assets/images/cloudy.jpg");
+    case 'rain':
+      return _buildBackground(Colors.blueGrey, "assets/images/rainy.jpg");
+    case 'storm':
+      return _buildBackground(Colors.black, "assets/images/rainy.jpg");
+    case 'snow':
+      return _buildBackground(Colors.white, "assets/images/snow.jpg");
+    default:
+      return _buildBackground(
+          Colors.lightBlue, "assets/images/default_weather.jpg");
+  }
+}
+
+// Helper method to return a container with a background color or image
+Widget _buildBackground(Color color, String image) {
+  return Container(
+    decoration: BoxDecoration(
+      color: color,
+      image: DecorationImage(
+        image: AssetImage(image), // Optional: Add an image as background
+        fit: BoxFit.cover,
+      ),
+    ),
+  );
 }

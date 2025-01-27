@@ -129,16 +129,19 @@ class Main {
 class Weather {
   final String description;
   final String icon;
+  final String main;
 
   Weather({
     required this.description,
     required this.icon,
+    required this.main,
   });
 
   factory Weather.fromJson(Map<String, dynamic> json) {
     return Weather(
       description: json['description'],
       icon: json['icon'],
+      main: json['main'],
     );
   }
 
